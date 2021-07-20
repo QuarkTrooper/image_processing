@@ -45,8 +45,11 @@ def convolution_test(imgIn, kernel):
             # dig deeper into this! The problem is very obvious when trying edge
             # detection matricies.
             #
-            # 2) I also need to fix proper boundary conditions so that the edges are
+            # 2) I need to fix proper boundary conditions so that the edges are
             # handled in a better way. The current solution is ugly!
+            #
+            # 3) I fucking don't understand the colon-syntax for extracting elements
+            # Why do I need to add one?! (eg. Ystart:Yend+1)
             # =======================================================================
 
             convolutionRoi = np.multiply(imgIn[Ystart:Yend+1, Xstart:Xend+1], kernel)
