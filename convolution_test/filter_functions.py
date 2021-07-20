@@ -37,12 +37,16 @@ def convolution_test(imgIn, kernel):
             Xend = min(Xend, imgInWidth-1) # or max image width
 
             # === ISSUES ============================================================
-            # I need to understand what's going on. I think there is an issue with
+            # 1) I need to understand what's going on. I think there is an issue with
             # bit depth of the pixels that either cause rollover or saturation or
             # something else that makes the result a big mess... Blur seems to
             # work fine, as long as you take the mean and not the sum. However,
             # the sum should create a clean convolution, so I'm not sure. Need to
-            # dig deeper into this!
+            # dig deeper into this! The problem is very obvious when trying edge
+            # detection matricies.
+            #
+            # 2) I also need to fix proper boundary conditions so that the edges are
+            # handled in a better way. The current solution is ugly!
             # =======================================================================
 
             convolutionRoi = np.multiply(imgIn[Ystart:Yend+1, Xstart:Xend+1], kernel)
