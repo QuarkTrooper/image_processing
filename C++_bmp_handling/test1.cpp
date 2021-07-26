@@ -16,6 +16,10 @@ int main(int argc, const char *argv[])
     const char* sPathString = argv[1];
     fileData.LoadImage(sPathString);
 
+    std::cout << "File size: " << fileData.GetFileSize() << "\n";
+    std::cout << "File type: " << std::uppercase << std::hex << fileData.GetFileType() << std::dec << std::nouppercase << "\n";
+    std::cout << "Image data address: " << std::uppercase << std::hex << fileData.GetImageDataAddress() << std::dec << std::nouppercase << "\n";
+
     // Terminate
     return 0;
 }
