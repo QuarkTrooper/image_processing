@@ -1,21 +1,23 @@
 
+#include <iostream>
+#include <fstream>
+#include "BitmapData.h"
 
-#include<fstream>
-#include<iostream>
-#include<stdio.h>
-
-int main()
+int main(int argc, const char *argv[])
 {
-  FILE* pFile;
-  pFile = fopen("white_test_image.bmp","r");
-  if (pFile!=NULL)
-  {
-    //printf("", *pFile)
+    // Main input sanity check
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << "white_test_image.bmp\n";
+        return 1;
+    }
 
-    fclose (pFile);
-  }
-  return 0;
+    // Load file data
+    BitmapData fileData;
+    const char* sPathString = argv[1];
+    fileData.LoadImage(sPathString);
+
+    fileData.PrintBitmapInfo();
+
+    // Terminate
+    return 0;
 }
-
-
-
