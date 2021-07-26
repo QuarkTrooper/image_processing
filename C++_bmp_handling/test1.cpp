@@ -16,7 +16,7 @@ int main(int argc, const char *argv[])
     const char* sPathString = argv[1];
     fileData.LoadImage(sPathString);
 
-    fileData.PrintBitmapData();
+    fileData.PrintBitmapInfo();
 
     // Terminate
     return 0;

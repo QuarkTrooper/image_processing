@@ -88,21 +88,7 @@ void BitmapData::LoadImage(const char* path)
                 }
                 m_iFileSize = cTot;
             }
-            else if(iLineNumber == ADDR_DATA_OFFSET) // Image data address
-            {
-                unsigned int cTot = 0;
-                for(int iByte = 0; iByte < ADDR_DATA_OFFSET_BYTES; iByte++)
-                {
-                    in.get(c);
-                    unsigned char c2 = reinterpret_cast<unsigned char&>(c);
-                    unsigned int value = int(c2);
-                    int increment = value<<(8*iByte);
-                    cTot = cTot + increment;
-                    iLineNumber++;
-                }
-                m_iImageDataAddress = cTot;
-            }
-            else if(iLineNumber == ADDR_HEADER_TYPE) // File size
+            else if(iLineNumber == ADDR_HEADER_TYPE) // Header type
             {
                 unsigned int cTot = 0;
                 for(int iByte = 0; iByte < ADDR_HEADER_TYPE_BYTES; iByte++)
@@ -116,6 +102,62 @@ void BitmapData::LoadImage(const char* path)
                 }
                 m_iInfoHeaderSize = cTot;
                 SetInfoHeaderType();
+            }
+            else if(iLineNumber == GetImageWidthAddress()) // Image width
+            {
+                unsigned int cTot = 0;
+                for(int iByte = 0; iByte < 4; iByte++) // Need to store that it's supposed to be 4 bytes somewhere better
+                {
+                    in.get(c);
+                    unsigned char c2 = reinterpret_cast<unsigned char&>(c);
+                    unsigned int value = int(c2);
+                    int increment = value<<(8*iByte);
+                    cTot = cTot + increment;
+                    iLineNumber++;
+                }
+                m_iImageWidth = cTot;
+            }
+            else if(iLineNumber == GetImageHeightAddress()) // Image width
+            {
+                unsigned int cTot = 0;
+                for(int iByte = 0; iByte < 4; iByte++) // Need to store that it's supposed to be 4 bytes somewhere better
+                {
+                    in.get(c);
+                    unsigned char c2 = reinterpret_cast<unsigned char&>(c);
+                    unsigned int value = int(c2);
+                    int increment = value<<(8*iByte);
+                    cTot = cTot + increment;
+                    iLineNumber++;
+                }
+                m_iImageHeight = cTot;
+            }
+            else if(iLineNumber == GetImageColorDepthAddress()) // Image colorDepth
+            {
+                unsigned int cTot = 0;
+                for(int iByte = 0; iByte < 2; iByte++) // Need to store that it's supposed to be 2 bytes somewhere better
+                {
+                    in.get(c);
+                    unsigned char c2 = reinterpret_cast<unsigned char&>(c);
+                    unsigned int value = int(c2);
+                    int increment = value<<(8*iByte);
+                    cTot = cTot + increment;
+                    iLineNumber++;
+                }
+                m_iImageColorDepth = cTot;
+            }
+            else if(iLineNumber == ADDR_DATA_OFFSET) // Image data address
+            {
+                unsigned int cTot = 0;
+                for(int iByte = 0; iByte < ADDR_DATA_OFFSET_BYTES; iByte++)
+                {
+                    in.get(c);
+                    unsigned char c2 = reinterpret_cast<unsigned char&>(c);
+                    unsigned int value = int(c2);
+                    int increment = value<<(8*iByte);
+                    cTot = cTot + increment;
+                    iLineNumber++;
+                }
+                m_iImageDataAddress = cTot;
             }
             else // Flush all non-defined bytes in file
             {
@@ -247,9 +289,87 @@ std::string BitmapData::GetInfoHeaderTypeString(eInfoHeaderType eType)
 }
 
 /***************************************************************************
-PrintBitmapData()
+GetImageWidthAddress()
 ***************************************************************************/
-void BitmapData::PrintBitmapData()
+int BitmapData::GetImageWidthAddress(eInfoHeaderType eType)
+{
+    switch(eType)
+    {
+        case BITMAPINFOHEADER:
+            return 18;
+            break;
+        default:
+            return 0;
+            break;
+    }
+}
+
+int BitmapData::GetImageWidthAddress()
+{
+    return GetImageWidthAddress(m_eInfoHeaderType);
+}
+
+int BitmapData::GetImageWidth()
+{
+    return m_iImageWidth;
+}
+
+/***************************************************************************
+GetImageHeightAddress()
+***************************************************************************/
+int BitmapData::GetImageHeightAddress(eInfoHeaderType eType)
+{
+    switch(eType)
+    {
+        case BITMAPINFOHEADER:
+            return 22;
+            break;
+        default:
+            return 0;
+            break;
+    }
+}
+
+int BitmapData::GetImageHeightAddress()
+{
+    return GetImageHeightAddress(m_eInfoHeaderType);
+}
+
+int BitmapData::GetImageHeight()
+{
+    return m_iImageHeight;
+}
+
+/***************************************************************************
+GetImageColorDepthAddress()
+***************************************************************************/
+int BitmapData::GetImageColorDepthAddress(eInfoHeaderType eType)
+{
+    switch(eType)
+    {
+        case BITMAPINFOHEADER:
+            return 28;
+            break;
+        default:
+            return 0;
+            break;
+    }
+}
+
+int BitmapData::GetImageColorDepthAddress()
+{
+    return GetImageColorDepthAddress(m_eInfoHeaderType);
+}
+
+int BitmapData::GetImageColorDepth()
+{
+    return m_iImageColorDepth;
+}
+
+/***************************************************************************
+PrintBitmapInfo()
+***************************************************************************/
+void BitmapData::PrintBitmapInfo()
 {
     std::cout << "\n";
     std::cout << "======================================================\n";
@@ -257,11 +377,14 @@ void BitmapData::PrintBitmapData()
     std::cout << "======================================================\n";
 
     std::cout << "File size: " << GetFileSize() << " bytes\n";
-    std::cout << "File type: " << std::uppercase << std::hex << GetFileType() << std::dec << std::nouppercase << "\n";
-    std::cout << "Image data address: " << std::uppercase << std::hex << GetImageDataAddress() << std::dec << std::nouppercase << "\n";
-    std::cout << "Info header size: " << GetInfoHeaderSize() << "\n";
-    std::cout << "Info header type: " << int(GetInfoHeaderType()) << "\n";
-    std::cout << "Info header type string: " << GetInfoHeaderTypeString(GetInfoHeaderType()) << "\n";
+    //std::cout << "File type: " << std::uppercase << std::hex << GetFileType() << std::dec << std::nouppercase << "\n";
+    //std::cout << "Image data address: " << std::uppercase << std::hex << GetImageDataAddress() << std::dec << std::nouppercase << "\n";
+    //std::cout << "Info header size: " << GetInfoHeaderSize() << "\n";
+    //std::cout << "Info header type: " << int(GetInfoHeaderType()) << "\n";
+    //std::cout << "Info header type string: " << GetInfoHeaderTypeString(GetInfoHeaderType()) << "\n";
+    std::cout << "Image width: " << GetImageWidth() << " pixels\n";
+    std::cout << "Image height: " << GetImageHeight() << " pixels\n";
+    std::cout << "Image color depth: " << GetImageColorDepth() << " bits\n";
 
     std::cout << "\n";
 }

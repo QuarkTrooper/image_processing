@@ -19,7 +19,17 @@ public:
     eInfoHeaderType GetInfoHeaderType();
     std::string GetInfoHeaderTypeString(eInfoHeaderType);
 
-    void PrintBitmapData();
+    static int GetImageWidthAddress(eInfoHeaderType);
+    int GetImageWidthAddress();
+    int GetImageWidth();
+    static int GetImageHeightAddress(eInfoHeaderType);
+    int GetImageHeightAddress();
+    int GetImageHeight();
+    static int GetImageColorDepthAddress(eInfoHeaderType);
+    int GetImageColorDepthAddress();
+    int GetImageColorDepth();
+
+    void PrintBitmapInfo();
 
 private:
     uint8_t** m_iImageData;
@@ -27,6 +37,9 @@ private:
     unsigned int m_iFileType;
     unsigned int m_iImageDataAddress;
     unsigned int m_iInfoHeaderSize;
+    unsigned int m_iImageWidth;
+    unsigned int m_iImageHeight;
+    unsigned int m_iImageColorDepth;
     eInfoHeaderType m_eInfoHeaderType;
 };
 
