@@ -4,8 +4,8 @@
 class BitmapData
 {
 public:
-    BitmapData(){};
-    ~BitmapData(){};
+    BitmapData();
+    ~BitmapData();
 
     LoadImage(const char*);
 private:
