@@ -2,7 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include "BitmapData.h"
-#include "BitmapFileAddresses.h"
 
 #define DEBUG_PRINTS
 
@@ -11,6 +10,12 @@ Constructor
 ***************************************************************************/
 BitmapData::BitmapData()
 {
+    m_iImageData = 0;
+    m_iFileSize = 0;
+    m_iFileType = 0;
+    m_iImageDataAddress = 0;
+    m_iInfoHeaderSize = 0;
+    m_eInfoHeaderType = NOTSPECIFIED;
 }
 
 /***************************************************************************
@@ -39,18 +44,23 @@ void BitmapData::LoadImage(const char* path)
 
     while (in)
     {
-        if(false) // Debug! Print all bytes
+        if(false) // Debug if true (Print all bytes)
         {
             in.get(c);
             unsigned char c2 = reinterpret_cast<unsigned char&>(c);
             unsigned int value = int(c2);
-            std::cout << iLineNumber << ": " << std::hex << value << std::dec << "\n";
+            if(false)
+            {
+                std::cout << iLineNumber << ": " << std::hex << value << std::dec << "\n";
+            }
+            else
+            {
+                std::cout << iLineNumber << ": " << value << "\n";
+            }
             iLineNumber++;
         }
         else
         {
-            //printf("iLineNumber = %d\n", iLineNumber);
-
             if(iLineNumber == ADDR_FILE_TYPE) // File type
             {
                 unsigned int cTot = 0;
@@ -92,6 +102,21 @@ void BitmapData::LoadImage(const char* path)
                 }
                 m_iImageDataAddress = cTot;
             }
+            else if(iLineNumber == ADDR_HEADER_TYPE) // File size
+            {
+                unsigned int cTot = 0;
+                for(int iByte = 0; iByte < ADDR_HEADER_TYPE_BYTES; iByte++)
+                {
+                    in.get(c);
+                    unsigned char c2 = reinterpret_cast<unsigned char&>(c);
+                    unsigned int value = int(c2);
+                    int increment = value<<(8*iByte);
+                    cTot = cTot + increment;
+                    iLineNumber++;
+                }
+                m_iInfoHeaderSize = cTot;
+                SetInfoHeaderType();
+            }
             else // Flush all non-defined bytes in file
             {
                 in.get(c);
@@ -127,5 +152,116 @@ unsigned int BitmapData::GetImageDataAddress()
     return m_iImageDataAddress;
 }
 
+/***************************************************************************
+GetInfoHeaderSize()
+***************************************************************************/
+unsigned int BitmapData::GetInfoHeaderSize()
+{
+    return m_iInfoHeaderSize;
+}
 
+/***************************************************************************
+SetInfoHeaderType()
+***************************************************************************/
+void BitmapData::SetInfoHeaderType()
+{
+    //return m_iInfoHeaderSize;
+    switch(m_iInfoHeaderSize)
+    {
+        case 0:
+            m_eInfoHeaderType = NOTSPECIFIED;
+            break;
+        case 12:
+            m_eInfoHeaderType = BITMAPCOREHEADER;
+            break;
+        case 64:
+            m_eInfoHeaderType = OS22XBITMAPHEADER64;
+            break;
+        case 16:
+            m_eInfoHeaderType = OS22XBITMAPHEADER16;
+            break;
+        case 40:
+            m_eInfoHeaderType = BITMAPINFOHEADER;
+            break;
+        case 52:
+            m_eInfoHeaderType = BITMAPV2INFOHEADER;
+            break;
+        case 56:
+            m_eInfoHeaderType = BITMAPV3INFOHEADER;
+            break;
+        case 108:
+            m_eInfoHeaderType = BITMAPV4HEADER;
+            break;
+        case 124:
+            m_eInfoHeaderType = BITMAPV5HEADER;
+            break;
+    }
+}
 
+/***************************************************************************
+GetInfoHeaderType()
+***************************************************************************/
+eInfoHeaderType BitmapData::GetInfoHeaderType()
+{
+    return m_eInfoHeaderType;
+}
+
+/***************************************************************************
+GetInfoHeaderTypeString()
+***************************************************************************/
+std::string BitmapData::GetInfoHeaderTypeString(eInfoHeaderType eType)
+{
+    switch(eType)
+    {
+        case NOTSPECIFIED:
+            return std::string("NOTSPECIFIED");
+            break;
+        case BITMAPCOREHEADER:
+            return std::string("BITMAPCOREHEADER");
+            break;
+        case OS22XBITMAPHEADER64:
+            return std::string("OS22XBITMAPHEADER64");
+            break;
+        case OS22XBITMAPHEADER16:
+            return std::string("OS22XBITMAPHEADER16");
+            break;
+        case BITMAPINFOHEADER:
+            return std::string("BITMAPINFOHEADER");
+            break;
+        case BITMAPV2INFOHEADER:
+            return std::string("BITMAPV2INFOHEADER");
+            break;
+        case BITMAPV3INFOHEADER:
+            return std::string("BITMAPV3INFOHEADER");
+            break;
+        case BITMAPV4HEADER:
+            return std::string("BITMAPV4HEADER");
+            break;
+        case BITMAPV5HEADER:
+            return std::string("BITMAPV5HEADER");
+            break;
+        default:
+            return std::string("NOTSPECIFIED");
+            break;
+    }
+}
+
+/***************************************************************************
+PrintBitmapData()
+***************************************************************************/
+void BitmapData::PrintBitmapData()
+{
+    std::cout << "\n";
+    std::cout << "======================================================\n";
+    std::cout << "Bitmap file information\n";
+    std::cout << "======================================================\n";
+
+    std::cout << "File size: " << GetFileSize() << " bytes\n";
+    std::cout << "File type: " << std::uppercase << std::hex << GetFileType() << std::dec << std::nouppercase << "\n";
+    std::cout << "Image data address: " << std::uppercase << std::hex << GetImageDataAddress() << std::dec << std::nouppercase << "\n";
+    std::cout << "Info header size: " << GetInfoHeaderSize() << "\n";
+    std::cout << "Info header type: " << int(GetInfoHeaderType()) << "\n";
+    std::cout << "Info header type string: " << GetInfoHeaderTypeString(GetInfoHeaderType()) << "\n";
+
+    std::cout << "\n";
+}
