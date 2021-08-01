@@ -17,6 +17,9 @@ int main(int argc, const char *argv[])
     fileData.LoadImage(sPathString);
 
     fileData.PrintBitmapInfo();
+    //fileData.PrintPixelArray(eBLUE); // blue
+    //fileData.PrintPixelArray(eGREEN); // green
+    //fileData.PrintPixelArray(eRED); // red
 
     // Terminate
     return 0;

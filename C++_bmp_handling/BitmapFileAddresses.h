@@ -1,3 +1,6 @@
+#ifndef _BITMAPFILEENUMS_
+#define _BITMAPFILEENUMS_
+
 #define ADDR_FILE_TYPE 0
 #define ADDR_FILE_TYPE_BYTES 2
 
@@ -22,3 +25,12 @@ enum eInfoHeaderType
     BITMAPV4HEADER,
     BITMAPV5HEADER
 };
+
+enum eChannelIndex
+{
+    eBLUE = 0,
+    eGREEN = 1,
+    eRED = 2
+};
+
+#endif

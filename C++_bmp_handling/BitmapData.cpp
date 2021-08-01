@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include "BitmapData.h"
 
@@ -10,7 +11,7 @@ Constructor
 ***************************************************************************/
 BitmapData::BitmapData()
 {
-    m_iImageData = 0;
+    m_ImageData = nullptr;
     m_iFileSize = 0;
     m_iFileType = 0;
     m_iImageDataAddress = 0;
@@ -23,6 +24,7 @@ Destructor
 ***************************************************************************/
 BitmapData::~BitmapData()
 {
+    delete m_ImageData;
 }
 
 /***************************************************************************
@@ -44,12 +46,12 @@ void BitmapData::LoadImage(const char* path)
 
     while (in)
     {
-        if(false) // Debug if true (Print all bytes)
+        if(false) // If true debug (I.e. just print all bytes and do not save)
         {
             in.get(c);
             unsigned char c2 = reinterpret_cast<unsigned char&>(c);
             unsigned int value = int(c2);
-            if(false)
+            if(false) // if true, print values as hex, otherwise as dec
             {
                 std::cout << iLineNumber << ": " << std::hex << value << std::dec << "\n";
             }
@@ -159,6 +161,32 @@ void BitmapData::LoadImage(const char* path)
                 }
                 m_iImageDataAddress = cTot;
             }
+            else if(iLineNumber == GetImageDataAddress()) // Pixel data
+            {
+                m_ImageData = new PixelArray(m_iImageHeight, m_iImageWidth);
+                int byteCounter = 0;
+                for(int iYpos = 0; iYpos < m_iImageHeight; iYpos++)
+                {
+                    for(int iXpos = 0; iXpos < m_iImageWidth; iXpos++)
+                    {
+                        for(int iChannel = 0; iChannel < 3; iChannel++)
+                        {
+                            in.get(c);
+                            byteCounter++;
+                            unsigned char c2 = reinterpret_cast<unsigned char&>(c);
+                            m_ImageData->SetPixelValue(m_iImageHeight-iYpos-1, iXpos, iChannel, c2);
+                            // Here we use (m_iImageHeight-iYpos-1) since bitmap data is stored "upside down"
+                            iLineNumber++;
+                        }
+                    }
+                    while (byteCounter%4 != 0)
+                    {
+                        in.get(c);
+                        byteCounter++;
+                    }
+
+                }
+            }
             else // Flush all non-defined bytes in file
             {
                 in.get(c);
@@ -167,8 +195,6 @@ void BitmapData::LoadImage(const char* path)
         }
     }
 }
-
-
 
 /***************************************************************************
 GetFileSize()
@@ -376,7 +402,7 @@ void BitmapData::PrintBitmapInfo()
     std::cout << "Bitmap file information\n";
     std::cout << "======================================================\n";
 
-    std::cout << "File size: " << GetFileSize() << " bytes\n";
+    std::cout << "File size: " << GetFileSize() << " bytes / " << GetFileSize()/1000 << " kb / " << GetFileSize()/1000000 << " mb\n";
     //std::cout << "File type: " << std::uppercase << std::hex << GetFileType() << std::dec << std::nouppercase << "\n";
     //std::cout << "Image data address: " << std::uppercase << std::hex << GetImageDataAddress() << std::dec << std::nouppercase << "\n";
     //std::cout << "Info header size: " << GetInfoHeaderSize() << "\n";
@@ -385,6 +411,31 @@ void BitmapData::PrintBitmapInfo()
     std::cout << "Image width: " << GetImageWidth() << " pixels\n";
     std::cout << "Image height: " << GetImageHeight() << " pixels\n";
     std::cout << "Image color depth: " << GetImageColorDepth() << " bits\n";
+
+    std::cout << "\n";
+}
+
+/***************************************************************************
+PrintPixelArray()
+***************************************************************************/
+void BitmapData::PrintPixelArray(eChannelIndex eChannel)
+{
+    std::cout << "======================================================\n";
+    printf("Bitmap pixel array (channel %d):\n", (int)eChannel);
+    std::cout << "======================================================\n";
+
+    //std::cout << std::hex;
+    //std::cout << std::setfill('0') << std::setw(2);
+    for(int iYpos = 0; iYpos < m_iImageHeight; iYpos++)
+    {
+        for(int iXpos = 0; iXpos < m_iImageWidth; iXpos++)
+        {
+            printf("%02x ", m_ImageData->GetPixelValue(iYpos, iXpos, eChannel));
+        }
+        std::cout << "\n";
+    }
+
+    //std::cout << std::dec;
 
     std::cout << "\n";
 }

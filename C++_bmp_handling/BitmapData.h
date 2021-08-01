@@ -2,6 +2,7 @@
 #define _BITMAPDATA_
 
 #include "BitmapFileAddresses.h"
+#include "PixelArray.h"
 #include <string>
 
 class BitmapData
@@ -30,9 +31,10 @@ public:
     int GetImageColorDepth();
 
     void PrintBitmapInfo();
+    void PrintPixelArray(eChannelIndex);
 
 private:
-    uint8_t** m_iImageData;
+    PixelArray* m_ImageData;
     int m_iFileSize;
     unsigned int m_iFileType;
     unsigned int m_iImageDataAddress;
